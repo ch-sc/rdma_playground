@@ -5,4 +5,4 @@ set(RDMA_CONFIG_SRC
 add_library(rdma_config ${RDMA_CONFIG_SRC})
 target_include_directories(rdma_config PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
-#target_link_libraries(rdma_utils)
+#target_link_libraries(net_message)

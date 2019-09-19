@@ -2,6 +2,7 @@
 
 #include "Config.h"
 #include "../utils/Logging.h"
+//#include "../utils/ErrorManager.h"
 #include <cmath>
 #include <regex>
 
@@ -9,7 +10,6 @@ using namespace rdma;
 
 //TEST
 int Config::HELLO_PORT = 4001;
-
 
 //RDMA
 size_t Config::RDMA_MEMSIZE = 1024ul * 1024 * 1024 * 5;  //1GB
@@ -72,7 +72,7 @@ void Config::init_vector(vector<int> &values, string csv_list) {
 }
 
 void Config::unload() {
-    google::protobuf::ShutdownProtobufLibrary();
+//    google::protobuf::ShutdownProtobufLibrary();
 }
 
 void Config::load(const string &prog_name) {
@@ -87,7 +87,7 @@ void Config::load(const string &prog_name) {
     ifstream file(conf_file.c_str());
 
     if (file.fail()) {
-        Logging::error(__FILE__, __LINE__,
+        Logging::warn(__FILE__, __LINE__,
                        "Failed to load config file at " + conf_file + ". "
                                                                       "The default values are used.");
     }
@@ -101,15 +101,13 @@ void Config::load(const string &prog_name) {
         if (line.length() == 0)
             continue;
 
-        if (std::regex_match(line, std::regex("^[ ]*[#;]"))) {
-            cerr << "Found comment in config: " << line << endl;
-//            std::cout << "Found comment in config\n";
+        if (std::regex_match(line, std::regex("^[ ]*[#;].*"))) {
             continue;
         }
-        if (line[0] == '#')
-            continue;
-        if (line[0] == ';')
-            continue;
+//        if (line[0] == '#')
+//            continue;
+//        if (line[0] == ';')
+//            continue;
 
         posEqual = line.find('=');
         key = line.substr(0, posEqual);

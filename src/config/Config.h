@@ -106,61 +106,60 @@ typedef unsigned long long uint128_t;
 typedef uint64_t NodeID;
 // typedef uint64_t Offset;
 
-namespace rdma
-{
+namespace rdma {
 
 //Constants
-class Config
-{
-  public:
-    Config(const string& prog_name)
-    {
-        load(prog_name);
-    }
+    class Config {
+    public:
+        Config(const string &prog_name) {
+            load(prog_name);
+        }
 
-    ~Config()
-    {
-        unload();
-    }
+        ~Config() {
+            unload();
+        }
 
-    //RDMA
-    static size_t RDMA_MEMSIZE;
-    static uint32_t RDMA_PORT;
-    static uint32_t RDMA_NUMAREGION;
-    static uint32_t RDMA_DEVICE;
-    static uint32_t RDMA_IBPORT;
-    static uint32_t RDMA_MAX_WR;
-    const static uint32_t RDMA_MAX_SGE = 1;
-    const static size_t RDMA_UD_OFFSET = 40;
-    const static int RDMA_SLEEP_INTERVAL = 100 * 1000;
-    
-    const static int PROTO_MAX_SOCKETS = 1024;
+        //RDMA
+        static size_t RDMA_MEMSIZE;
+        static uint32_t RDMA_PORT;
+        static uint32_t RDMA_NUMAREGION;
+        static uint32_t RDMA_DEVICE;
+        static uint32_t RDMA_IBPORT;
+        static uint32_t RDMA_MAX_WR;
+        const static uint32_t RDMA_MAX_SGE = 1;
+        const static size_t RDMA_UD_OFFSET = 40;
+        const static int RDMA_SLEEP_INTERVAL = 100 * 1000;
 
-    //SYSTEM
-    static uint32_t CACHELINE_SIZE;
+        const static int PROTO_MAX_SOCKETS = 1024;
 
-    //THREAD
-    static vector<int> THREAD_CPUS;
+        //SYSTEM
+        static uint32_t CACHELINE_SIZE;
 
-    //LOGGING
-    static int LOGGING_LEVEL; //0=all, 1=ERR, 2=DBG, 3=INF, (>=4)=NONE
+        //THREAD
+        static vector<int> THREAD_CPUS;
 
-    //TEST
-    static int HELLO_PORT;
+        //LOGGING
+        static int LOGGING_LEVEL; //0=all, 1=ERR, 2=DBG, 3=INF, (>=4)=NONE
 
-    // static string& getIPFromNodeId(NodeID& nodeid);
-    // static string& getIPFromNodeId(const NodeID& nodeid);
+        //TEST
+        static int HELLO_PORT;
 
-  private:
-    static void load(const string& exec_path);
-    static void unload();
+        // static string& getIPFromNodeId(NodeID& nodeid);
+        // static string& getIPFromNodeId(const NodeID& nodeid);
 
-    static void set(string key, string value);
-    static void init_vector(vector<string> &values, string csv_list);
-    static void init_vector(vector<int> &values, string csv_list);
+    private:
+        static void load(const string &exec_path);
 
-    static string getIP();
-};
+        static void unload();
+
+        static void set(string key, string value);
+
+        static void init_vector(vector<string> &values, string csv_list);
+
+        static void init_vector(vector<int> &values, string csv_list);
+
+        static string getIP();
+    };
 
 } // end namespace rdma
 

@@ -3,20 +3,22 @@
 #ifndef MESSAGETYPES_H_
 #define MESSAGETYPES_H_
 
-// #include "../utils/Config.h"
+#include "../config/Config.h"
 
-//#include "HelloMessage.pb.h"
-#include "RDMAConnRequest.pb.h"
-#include "RDMAConnResponse.pb.h"
-#include "RDMAConnRequestMgmt.pb.h"
-#include "RDMAConnResponseMgmt.pb.h"
-#include "MemoryResourceRequest.pb.h"
-#include "MemoryResourceResponse.pb.h"
+//#include "../../cmake-build-debug/src/message/HelloMessage.pb.h"
+#include "../../cmake-build-debug/src/message/RDMAConnRequest.pb.h"
+#include "../../cmake-build-debug/src/message/RDMAConnResponse.pb.h"
+#include "../../cmake-build-debug/src/message/RDMAConnRequestMgmt.pb.h"
+#include "../../cmake-build-debug/src/message/RDMAConnResponseMgmt.pb.h"
+#include "../../cmake-build-debug/src/message/MemoryResourceRequest.pb.h"
+#include "../../cmake-build-debug/src/message/MemoryResourceResponse.pb.h"
 
-#include "ErrorMessage.pb.h"
+#include "../../cmake-build-debug/src/message/ErrorMessage.pb.h"
+#include "../../cmake-build-debug/src/message/MemoryResourceRequest.pb.h"
 
 #include <google/protobuf/any.pb.h>
 #include <google/protobuf/message.h>
+#include <iostream>
 using google::protobuf::Any;
 
 namespace rdma
@@ -42,7 +44,7 @@ public:
     return anyMessage;
   }
 
-  static Any createMemoryResourceRequest(size_t size, string &name,
+  static Any createMemoryResourceRequest(size_t size, std::string &name,
                                          bool persistent)
   {
     MemoryResourceRequest resReq;
@@ -67,7 +69,6 @@ public:
     return anyMessage;
   }
 };
-// end class
-} // end namespace rdma
+}
 
-#endif /* MESSAGETYPES_H_ */
+#endif // MESSAGETYPES_H_
