@@ -2,6 +2,8 @@
 #pragma once
 
 #include "../../src/config/Config.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 
 using namespace rdma;
 

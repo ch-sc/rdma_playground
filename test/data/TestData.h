@@ -6,33 +6,35 @@
 
 #include "../../src/config/Config.h"
 #include "../../src/data/DataRepository.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 
 using namespace rdma;
 
 class TestData : public CppUnit::TestFixture {
-    DPI_UNIT_TEST_SUITE(TestData);
-    DPI_UNIT_TEST(testWriteDataToFile);
-    DPI_UNIT_TEST(testReadDataFromFile);
+DPI_UNIT_TEST_SUITE(TestData);
+        DPI_UNIT_TEST(testReadAndWriteOfStrings);
+        DPI_UNIT_TEST(testReadAndWriteOfNumerics);
+        DPI_UNIT_TEST(testSerializationAndDeserialization);
+        DPI_UNIT_TEST(testBenchmarkQuery);
     DPI_UNIT_TEST_SUITE_END();
 
 public:
-    /**
-     * do some preparation before all tests
-     */
-    void setUp();
+    void setUp() override;
 
-    /**
-     * clean up after all tests
-     */
-    void tearDown();
+    void tearDown() override;
 
-    void testWriteDataToFile();
+    void testReadAndWriteOfStrings();
 
-    void testReadDataFromFile();
+    void testReadAndWriteOfNumerics();
+
+    void testSerializationAndDeserialization();
+
+    void testBenchmarkQuery();
 
 private:
     string data_location = "testlocation";
     string test_csv_file = "data.csv";
-    rdma::store data_store{};
+    rdma::DataStore data_store = rdma::DataStore();
 };
 

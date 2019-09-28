@@ -62,15 +62,23 @@ namespace rdma {
 //        std::cout << " seconds from epoch are " << pt_to_time_t(pt) << '\n';
     }
 
+    /**
+     * Encodes a date as integer of the form <year><month><day>; e.g., the date '1998-01-05' will be encoded as integer
+     * 19980105
+     *
+     * @param date_time_source
+     * @param result
+     * @return
+     */
     bool convertStringToInternalDateType(const std::string &date_time_source,
                                          uint32_t &result) {
         std::vector<std::string> strs;
         boost::split(strs, date_time_source, boost::is_any_of("-"));
+
         if (strs.size() != 3) {
             return false;
         }
-        // we encode a date as integer of the form <year><month><day>
-        // e.g., the date '1998-01-05' will be encoded as integer 19980105
+
         auto res_value = boost::lexical_cast<uint32_t>(strs[2]);
         res_value += boost::lexical_cast<uint32_t>(strs[1]) * 100;
         res_value += boost::lexical_cast<uint32_t>(strs[0]) * 100 * 100;

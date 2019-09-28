@@ -13,8 +13,8 @@ namespace rdma {
     static
     int fail(std::string file_name, int line_number) {
         rdma::Logging::fatal(file_name, line_number, strerror(errno));
+        // todo: end program gracefully
         exit(1);
-        return 0;
     }
 
 #define FAIL fail(__FILE__, __LINE__)

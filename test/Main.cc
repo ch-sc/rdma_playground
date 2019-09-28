@@ -125,8 +125,7 @@ static void runtest(int t) {
 int main(int argc, char *argv[]) {
     struct config_t config;
     struct option long_options[] = {
-            {"number"
-             "",     required_argument, 0, 'n'},
+            {"number", required_argument, 0, 'n'},
             {"port", optional_argument, 0, 'p'},
             {"mode", optional_argument, 0, 'm'}
     };
@@ -172,10 +171,8 @@ int main(int argc, char *argv[]) {
     string exec_path = string(argv[0]);
     static Config conf(exec_path);
 
-    if (config.test_number
-        > 0) {
-        runtest(config.test_number
-        );
+    if (config.test_number > 0) {
+        runtest(config.test_number);
         return 0;
     }
 

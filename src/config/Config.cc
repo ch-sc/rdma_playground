@@ -2,7 +2,6 @@
 
 #include "Config.h"
 #include "../utils/Logging.h"
-//#include "../utils/ErrorManager.h"
 #include <cmath>
 #include <regex>
 
@@ -26,7 +25,7 @@ uint32_t Config::CACHELINE_SIZE = 64;
 vector<int> Config::THREAD_CPUS = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
 
 //LOGGING
-int Config::LOGGING_LEVEL = 3;
+int Config::LOGGING_LEVEL = LOG_LEVEL_INFO;
 
 // string& Config::getIPFromNodeId(NodeID& node_id){
 //   return Config::DPI_NODES.at(node_id -1);
@@ -42,7 +41,7 @@ inline string trim(string str) {
     return str;
 }
 
-void Config::init_vector(vector<string> &values, string csv_list) {
+void Config::init_vector(vector<string> &values, const string& csv_list) {
     values.clear();
     char *csv_clist = new char[csv_list.length() + 1];
     strcpy(csv_clist, csv_list.c_str());
@@ -56,7 +55,7 @@ void Config::init_vector(vector<string> &values, string csv_list) {
     delete[] csv_clist;
 }
 
-void Config::init_vector(vector<int> &values, string csv_list) {
+void Config::init_vector(vector<int> &values, const string& csv_list) {
     values.clear();
     char *csv_clist = new char[csv_list.length() + 1];
     strcpy(csv_clist, csv_list.c_str());
@@ -77,10 +76,10 @@ void Config::unload() {
 
 void Config::load(const string &prog_name) {
     string conf_file;
-    if (prog_name.empty() || prog_name.find("/") == string::npos) {
+    if (prog_name.empty() || prog_name.find('/') == string::npos) {
         conf_file = ".";
     } else {
-        conf_file = prog_name.substr(0, prog_name.find_last_of("/"));
+        conf_file = prog_name.substr(0, prog_name.find_last_of('/'));
     }
     conf_file += "/config/RDMA.conf";
 
@@ -116,23 +115,23 @@ void Config::load(const string &prog_name) {
     }
 }
 
-void Config::set(string key, string value) {
+void Config::set(const string& key, const string& value) {
     //config
-    if (key.compare("RDMA_PORT") == 0) {
+    if (key == "RDMA_PORT") {
         Config::RDMA_PORT = stoi(value);
-    } else if (key.compare("RDMA_MEMSIZE") == 0) {
+    } else if (key == "RDMA_MEMSIZE") {
         Config::RDMA_MEMSIZE = strtoul(value.c_str(), nullptr, 0);
-    } else if (key.compare("RDMA_NUMAREGION") == 0) {
+    } else if (key == "RDMA_NUMAREGION") {
         Config::RDMA_NUMAREGION = stoi(value);
-    } else if (key.compare("RDMA_DEVICE") == 0) {
+    } else if (key == "RDMA_DEVICE") {
         Config::RDMA_DEVICE = stoi(value);
-    } else if (key.compare("RDMA_IBPORT") == 0) {
+    } else if (key == "RDMA_IBPORT") {
         Config::RDMA_IBPORT = stoi(value);
-    } else if (key.compare("THREAD_CPUS") == 0) {
+    } else if (key == "THREAD_CPUS") {
         init_vector(Config::THREAD_CPUS, value);
-    } else if (key.compare("LOGGING_LEVEL") == 0) {
+    } else if (key == "LOGGING_LEVEL") {
         Config::LOGGING_LEVEL = stoi(value);
-    } else if (key.compare("CACHELINE_SIZE") == 0) {
+    } else if (key == "CACHELINE_SIZE") {
         Config::CACHELINE_SIZE = stoi(value);
     }
 }
@@ -140,7 +139,7 @@ void Config::set(string key, string value) {
 
 string Config::getIP() {
     int fd;
-    struct ifreq ifr;
+    struct ifreq ifr{};
     fd = socket(AF_INET, SOCK_DGRAM, 0);
     /* I want to get an IPv4 IP address */
     ifr.ifr_addr.sa_family = AF_INET;

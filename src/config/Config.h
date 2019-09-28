@@ -1,33 +1,19 @@
-/**
- * @file Config.h
- * @author cbinnig, lthostrup, tziegler
- * @date 2018-08-17
- */
-
-
-
 #ifndef CONFIG_HPP_
 #define CONFIG_HPP_
 
-//Includes
 #include <iostream>
 #include <stddef.h>
 #include <sstream>
-#include <unistd.h>
 #include <stdint.h>
 #include <stdexcept>
 #include <vector>
 #include <unordered_map>
-#include <string.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
 #include <google/protobuf/stubs/common.h>
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <string.h> /* For strncpy */
+#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -108,6 +94,12 @@ typedef uint64_t NodeID;
 
 namespace rdma {
 
+#define LOG_LEVEL_ALL 0
+#define LOG_LEVEL_ERROR 1
+#define LOG_LEVEL_WARNING 2
+#define LOG_LEVEL_INFO 3
+#define LOG_LEVEL_DEBUG 4
+
 //Constants
     class Config {
     public:
@@ -139,7 +131,7 @@ namespace rdma {
         static vector<int> THREAD_CPUS;
 
         //LOGGING
-        static int LOGGING_LEVEL; //0=all, 1=ERR, 2=DBG, 3=INF, (>=4)=NONE
+        static int LOGGING_LEVEL; //0=all, 1=ERR, 2=WRN, 3=INF, 4=DBG, (>=4)=NONE
 
         //TEST
         static int HELLO_PORT;
@@ -152,11 +144,11 @@ namespace rdma {
 
         static void unload();
 
-        static void set(string key, string value);
+        static void set(const string& key, const string& value);
 
-        static void init_vector(vector<string> &values, string csv_list);
+        static void init_vector(vector<string> &values, const string& csv_list);
 
-        static void init_vector(vector<int> &values, string csv_list);
+        static void init_vector(vector<int> &values, const string& csv_list);
 
         static string getIP();
     };

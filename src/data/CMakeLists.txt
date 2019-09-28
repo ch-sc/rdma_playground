@@ -3,7 +3,6 @@ set(RDMA_DATA_SRC
         DataStore.h
         ) # Adding headers required for portability reasons http://voices.canonical.com/jussi.pakkanen/2013/03/26/a-list-of-common-cmake-antipatterns/
 
-add_library(rdma_data ${RDMA_DATA_SRC})
 
 find_package(OpenMP REQUIRED)
 if (OPENMP_FOUND)
@@ -20,22 +19,23 @@ option(Boost_USE_MULTITHREADED
         "Search for multithreaded boost libs" ON)
 option(Boost_USE_STATIC_RUNTIME
         "Search for boost libs linked against static C++ runtime" OFF)
-find_package(Boost 1.47.0 REQUIRED filesystem system)
-#[[
-]]
+find_package(Boost 1.65.1 COMPONENTS filesystem system REQUIRED)
+
 
 # ensure that dependant libraries not explicitly specified here
 # are found by the linker:
-
 link_directories(${Boost_LIBRARY_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
-set(LIBS ${LIBS} ${Boost_LIBRARIES})
-#[[
-]]
+#set(LIBS ${LIBS} ${Boost_LIBRARIES})
+
+add_library(rdma_data ${RDMA_DATA_SRC})
 
 target_include_directories(rdma_data PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(rdma_data
         rdma_config
         rdma_utils
         ${OpenMP_LIBRARIES}
+        ${Boost_LIBRARIES}
         )
+#target_link_libraries(rdma_data
+#        ${LIBS})
