@@ -15,7 +15,7 @@ namespace rdma {
             // avoid unused variable warning
             (void) msg;
 #ifdef DEBUG
-            if (Config::LOGGING_LEVEL <= LOG_LEVEL_DEBUG)
+            if (Config::LOGGING_LEVEL >= LOG_LEVEL_DEBUG)
                 log("[DEBUG]: ", msg);
 #endif
         }
@@ -26,48 +26,48 @@ namespace rdma {
             (void) line;
             (void) msg;
 #ifdef DEBUG
-            if (Config::LOGGING_LEVEL <= LOG_LEVEL_DEBUG)
+            if (Config::LOGGING_LEVEL >= LOG_LEVEL_DEBUG)
                 log("[DEBUG]: ", filename, line, msg);
 #endif
         }
 
         static void info(const std::string& msg) {
-            if (Config::LOGGING_LEVEL <= LOG_LEVEL_INFO) {
+            if (Config::LOGGING_LEVEL >= LOG_LEVEL_INFO) {
                 log("[INFO]", msg);
             }
         }
 
         static void info(const std::string& filename, int line, const std::string& msg) {
-            if (Config::LOGGING_LEVEL <= LOG_LEVEL_INFO) {
+            if (Config::LOGGING_LEVEL >= LOG_LEVEL_INFO) {
                 log("[INFO]", filename, line, msg);
             }
         }
 
         static void warn(const std::string& msg) {
-            if (Config::LOGGING_LEVEL <= LOG_LEVEL_WARNING) {
+            if (Config::LOGGING_LEVEL >= LOG_LEVEL_WARNING) {
                 log("[WARNING]", msg);
             }
         }
 
         static void warn(const std::string& filename, int line, const std::string& msg) {
-            if (Config::LOGGING_LEVEL <= LOG_LEVEL_WARNING) {
+            if (Config::LOGGING_LEVEL >= LOG_LEVEL_WARNING) {
                 log("[WARNING]", filename, line, msg);
             }
         }
 
         static void error(const std::string& filename, int line, const std::string& msg) {
-            if (Config::LOGGING_LEVEL <= LOG_LEVEL_WARNING) {
+            if (Config::LOGGING_LEVEL >= LOG_LEVEL_WARNING) {
                 log("[ERROR]", filename, line, msg);
             }
         }
 
         static void errorNo(const std::string& filename, int line, char *msg, int err_no) {
-            if (Config::LOGGING_LEVEL <= LOG_LEVEL_ERROR)
+            if (Config::LOGGING_LEVEL >= LOG_LEVEL_ERROR)
                 logNo("[ERROR]", filename, line, err_no, msg);
         }
 
         static void fatal(const std::string& filename, int line, const std::string& msg) {
-            if (Config::LOGGING_LEVEL <= LOG_LEVEL_ERROR)
+            if (Config::LOGGING_LEVEL >= LOG_LEVEL_ERROR)
                 log("[FATAL]: ", filename, line, msg);
         }
 

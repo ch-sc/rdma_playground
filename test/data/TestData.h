@@ -16,7 +16,7 @@ DPI_UNIT_TEST_SUITE(TestData);
         DPI_UNIT_TEST(testReadAndWriteOfStrings);
         DPI_UNIT_TEST(testReadAndWriteOfNumerics);
         DPI_UNIT_TEST(testSerializationAndDeserialization);
-        DPI_UNIT_TEST(testBenchmarkQuery);
+        DPI_UNIT_TEST(testQuery);
     DPI_UNIT_TEST_SUITE_END();
 
 public:
@@ -30,7 +30,7 @@ public:
 
     void testSerializationAndDeserialization();
 
-    void testBenchmarkQuery();
+    void testQuery();
 
 private:
     string data_location = "testlocation";

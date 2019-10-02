@@ -1,33 +1,16 @@
 #include "TestData.h"
 #include <boost/filesystem.hpp>
-//#include <boost/filesystem/operations.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/system/detail/error_code.ipp>
 #include <system_error>
-//#include <boost/filesystem/detail/>
 #include <iostream>
 #include <sys/stat.h>
 #include <../../src/utils/StringHelper.h>
 #include <cmath>
+#include "../../src/utils/CsvUtils.h"
 
-//using boost::filesystem::detail::remove_all;
-//using boost::filesystem::detail::status;
 namespace fs = boost::filesystem;
 namespace detail = boost::filesystem::detail;
-
-static bool next_csv_value(const string &line, int &pos, string &value) {
-    int next_pos = line.find(',', pos);
-    if (next_pos < 0) {
-        if (line.empty()) return false;
-
-        value = line.substr(pos, line.length());
-        pos = line.length() - 1;
-        return true;
-    }
-    value = line.substr(pos, next_pos - pos);
-    pos = next_pos + 1;
-    return true;
-}
 
 static void read_test_csv_file(const string &csv_file_path, DataStore &data_store) {
     rdma::read_csv_file(csv_file_path, data_store, [](DataStore &ds, string &line, vector<string> header) {
@@ -236,31 +219,35 @@ void TestData::testSerializationAndDeserialization() {
         }
     }
     ref_ds_ptr.release();
-    auto p = test_ds_ptr.release();
+    test_ds_ptr.release();
 }
 
 
-void test_query(unique_ptr<store> data_store) {
+float test_query(unique_ptr<store> &data_store) {
+    auto ids = data_store->strings["id (string)"];
     auto titles = data_store->choices["title (choice)"];
-    auto title_stats = data_store->choice_stats["title (choice)"];
-
-    auto stats = data_store->strings["id (text)"];
-
-    auto number = data_store->numerics["number (numeric)"];
-    auto number_stats = data_store->num_stats["number (numeric)"];
-
-    float ratio = (float) title_stats.cardinality / (float) max((int) title_stats.count, 1);
-
-    for (auto &t : titles) {
-
+    auto titles_dict = data_store->choice_dictionaries["title (choice)"];
+    auto choice_key = titles_dict["AAA"];
+    auto numbers = data_store->numerics["number (numeric)"];
+    float result = 0.0f;
+    for (ulong i = 0; i < ids.size(); i++) {
+        if (titles[i] == choice_key) {
+            result += numbers[i];
+        }
     }
+    return result;
 }
 
-void TestData::testBenchmarkQuery() {
+void TestData::testQuery() {
     // Arrange
-    auto data_store = rdma::deserialize_data_store(data_location);
+    auto ds_p = this->data_store.get_store();
 
-//    test_query(data_store_p->get_store());
+    // Act
+    auto result = test_query(ds_p);
+    ds_p.release();
+
+    // Assert
+    CPPUNIT_ASSERT_MESSAGE("Query result is correct",result == 1000.0f);
 }
 
 

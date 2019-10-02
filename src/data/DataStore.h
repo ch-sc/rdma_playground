@@ -102,24 +102,19 @@ namespace rdma {
             add_numeric_value(column, value);
         }
 
-
-        inline
-        Column<string> *get_string_column(string &column_name) {
+        inline Column<string> *get_string_column(string &column_name) {
             return &data_store.strings[column_name];
         }
 
-        inline
-        Column<int> *get_choice_column(string &column_name) {
+        inline Column<int> *get_choice_column(string &column_name) {
             return &data_store.choices[column_name];
         }
 
-        inline
-        Column<float> *get_numeric_column(string &column_name) {
+        inline Column<float> *get_numeric_column(string &column_name) {
             return &data_store.numerics[column_name];
         }
 
-        inline
-        unique_ptr<store> get_store() {
+        inline unique_ptr<store> get_store() {
             return unique_ptr<rdma::store>(&this->data_store);
         }
 
@@ -153,6 +148,7 @@ namespace rdma {
             // update statistics
             numeric_statistics &stats = this->data_store.num_stats[column];
             stats.sum += value;
+            stats.count++;
             if (stats.max < value) {
                 stats.max = value;
             } else if (stats.min > value) {
@@ -199,47 +195,6 @@ namespace rdma {
         }
         Logging::debug(log);
 #endif
-//        store;
-    }
-
-    template<typename Func>
-    static void read_csv_file(const string &csv_file_path, rdma::DataStore &ds, Func parse_line) {
-        std::fstream csv_file;
-
-        csv_file.open(csv_file_path.c_str(), std::ios::in);
-
-        string header_line;
-        getline(csv_file, header_line);
-        std::vector<std::string> header;
-
-        boost::split(header, header_line, boost::is_any_of(","));
-
-//        auto *s = (rdma::store *) malloc(sizeof(rdma::store));
-
-//        auto *ds = (rdma::DataStore *) malloc(sizeof(rdma::DataStore));
-//        ds = new(ds, s);
-//        rdma::store s = *ds->get_store();
-
-//        store s{};
-//        DataStore ds = *new DataStore(s);
-
-        auto store_ptr = ds.get_store();
-        header_to_schema(header, store_ptr.get());
-        store_ptr.release();
-
-        string line;
-        while (getline(csv_file, line)) {
-
-            boost::algorithm::trim(line);
-
-            if (line.empty() || line == "\n") break;
-
-            parse_line(ds, line, header);
-        }
-
-        csv_file.close();
-
-        update_statistics(ds);
     }
 
 }
