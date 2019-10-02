@@ -12,7 +12,6 @@
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/list.hpp>
-//#include <boost/archive/basic_archive.hpp>
 #include <immintrin.h>
 #include <unistd.h>
 #include <sys/mman.h>
@@ -22,7 +21,6 @@
 #include <cstdint>
 #include <dirent.h>
 #include <regex>
-//#include <valarray>
 
 namespace rdma {
 
@@ -34,8 +32,8 @@ namespace rdma {
     }
 
     template<typename V>
-    static void
-    copy_slice(V *destination, const char *buffer, uint32_t start_index = 0, uint32_t end_index = UINT_MAX) {
+    static
+    void copy_slice(V *destination, const char *buffer, uint32_t start_index = 0, uint32_t end_index = UINT_MAX) {
         if (end_index == UINT_MAX) {
             size_t size = sizeof(V);
             end_index = start_index + size;
@@ -43,94 +41,6 @@ namespace rdma {
 
         memcpy(&destination, &buffer[start_index], end_index);
     }
-
-/*
-    static
-    int read_int(char *buffer, int idx) {
-        int i;
-        memcpy(&i, &buffer[idx], 4);
-        return i;
-    }
-
-    struct mapped_byte_buffer {
-        char *buffer;
-        uint32_t size;
-    };
-
-    static
-    mapped_byte_buffer map_byte_buffer(char *path, int expected_type) {
-        int cache_file = open(path, O_RDONLY);
-
-        struct stat st{};
-        stat(path, &st);
-//        off_t size = st.st_size;
-        size_t size = st.st_size;
-
-        char *buffer = new char[size];
-        mmap(buffer, size, PROT_READ,  MAP_PRIVATE | MAP_POPULATE, cache_file, 0L);
-
-        close(cache_file);
-
-        int type = read_int(buffer, (int) size - 4);
-
-        if (type != expected_type) {
-            printf("Unexpected type %x\n", type);
-            FAIL;
-        }
-
-        struct mapped_byte_buffer ret = {buffer, (uint32_t) size - 4};
-        return ret;
-    }
-
-
- * If serializing a more complex struct or class use: @code friend class boost::serialization::access
- *
- * // EXAMPLE:
- *
- * struct customType {
- *     string string1;
- *     string string2;
- *     int i;
- *     list <string> list;
- *
- *     // boost serialize
- * private:
- *     friend class boost::serialization::access;
- *
- *     template<typename Archive>
- *     void serialize(Archive &ar, const unsigned int version) {
- *         ar & string1;
- *         ar & string2;
- *         ar & i;
- *         ar & list;
- *     }
- * }
- *
-    template<typename ClassTo>
-    static bool serializeAny(const string &file_path, const ClassTo &c) {
-        ofstream out_stream(file_path.c_str(), ios::binary);
-        if (out_stream.fail()) {
-            Logging::warn(__FILE__, __LINE__, "could not write to file: " + file_path + " ERROR: " + strerror(errno));
-            return false;
-        }
-        boost::archive::binary_oarchive oa(out_stream, boost::archive::archive_flags::no_tracking);
-        oa << c;
-        return true;
-    }
-
-    template<typename ClassTo>
-    static bool deserializeAny(const string &file_path, const ClassTo &c) {
-        ifstream in_stream(file_path.c_str(), ios::binary & ios::in);
-        if (in_stream.fail()) {
-            Logging::warn(__FILE__, __LINE__, "could not read from file: " + file_path + " ERROR: " + strerror(errno));
-            return false;
-        }
-        boost::archive::binary_iarchive in_archive(in_stream, boost::archive::archive_flags::no_tracking);
-        in_archive >> c;
-        return true;
-    }
-
-    */
 
     template<typename T, typename Allocator = std::allocator<T>>
     static bool readColumnFromFile(const std::string &file_path, std::vector<T, Allocator> &vec) {
@@ -175,8 +85,7 @@ namespace rdma {
     template<typename V>
     static bool writeDictToFile(const string &file_path, const map<string, V> &dict) {
         std::stringstream sting_builder;
-//        auto stringBuffer = new vector<char>(/*dict.size() * 15*/);
-        auto values = new vector<V>(/*dict.size()*/);
+        auto values = new vector<V>();
         const char sanitizer_c = '_';
 
         if (dict.empty()) {
@@ -216,7 +125,7 @@ namespace rdma {
     }
 
     template<typename V>
-    static bool readDictFromFile(const string &file_path, map<string, V> &dict_p) {
+    static bool readDictFromFile(const string &file_path, map<string, V> *dict_p) {
         std::fstream cache_file;
         cache_file.open(file_path.c_str(), std::ios::binary | std::ios::in);
         if (!cache_file.is_open()) {
@@ -241,10 +150,7 @@ namespace rdma {
         uint32_t pos = key_end_idx + 4;
         const size_t value_type_size = sizeof(V);
         for (auto &key : keys) {
-            // copies from stack to heap are described as undefined behavior (UB). Thus, instead we do the copy by hand.
-            V v{};
-            memcpy(&v, &file_content[pos], value_type_size);
-            dict_p[key] = v;
+            memcpy(&(*dict_p)[key], &file_content[pos], value_type_size);
             pos += value_type_size;
         }
 
@@ -284,34 +190,46 @@ namespace rdma {
         return ret;
     }
 
-    static void build_statistics(DataStore *dataStore) {
-        auto store = dataStore->get_store();
+    static void build_statistics(DataStore &dataStore) {
+        auto store = dataStore.get_store();
 
-        for (auto &string_column_entry : store->strings) {
-            string column_name = string_column_entry.first;
-            store->choice_stats[column_name].count = string_column_entry.second.size();
+        for (auto &string_entry : store->strings) {
+            string column_name = string_entry.first;
+            choice_statistics &stats = store->choice_stats[column_name];
+            stats.count = string_entry.second.size();
+            stats.cardinality = string_entry.second.size();
         }
 
         for (auto &choice_column_entry : store->choices) {
             string column_name = choice_column_entry.first;
-            store->choice_stats[column_name].count = choice_column_entry.second.size();
-            store->choice_dictionaries[column_name] = map<string, int>();
+            auto stats = &store->choice_stats[column_name];
+            stats->count = choice_column_entry.second.size();
+            auto dict = store->choice_dictionaries[column_name];
+            stats->cardinality = dict.size();
+        }
 
-            map<string, int> dict = store->choice_dictionaries[column_name];
-
-//            for (int &value : choice_column_entry.second) {
-//                if (dict.count(value) == 0) {
-//                    dict[value] = (int) dict.size();
-//                } else {
-//                    dict[value] += 1;
-//                }
-//            }
+        for (auto &num_entry : store->numerics) {
+            string column_name = num_entry.first;
+            auto stats = &store->num_stats[column_name];
+            stats->count = num_entry.second.size();
+            if (stats->count > 0) {
+                stats->min = LONG_MAX;
+                stats->max = LONG_MIN;
+            }
+            for (auto &value : num_entry.second) {
+                if (value > stats->max)
+                    stats->max = value;
+                else if (value < stats->min)
+                    stats->min = value;
+                stats->sum += value;
+            }
+            stats->avg = stats->sum / stats->count;
         }
 
         store.release();
     }
 
-    static DataStore * deserialize_data_store(const string &data_location) {
+    static DataStore *deserialize_data_store(const string &data_location) {
         auto data_store = new DataStore();
         auto dir = opendir(data_location.c_str());
 
@@ -319,7 +237,6 @@ namespace rdma {
             string err_no = strerror(errno);
             rdma::Logging::error(__FILE__, __LINE__,
                                  "I/O error while trying to read from dir " + data_location + ": " + err_no);
-//            return shared_ptr<DataStore>(data_store);
             return data_store;
         }
 
@@ -359,7 +276,7 @@ namespace rdma {
                 column += "_" + strs[i];
             }
 
-            const string file_path = data_location + "/" + filename;
+            const string file_path = ((string) data_location).append("/").append(filename); // + "/" + filename;
 
             if (ds == "cache") {
                 switch (type) {
@@ -377,10 +294,7 @@ namespace rdma {
                         FAIL;
                 }
             } else if (ds == "dict") {
-//                auto dict = new map<string, int>();
-//                readDictFromFile<int>(file_path, *dict);
-//                ds_ptr->choice_dictionaries[column] = *dict;
-                readDictFromFile<int>(file_path, ds_ptr->choice_dictionaries[column]);
+                readDictFromFile<int>(file_path, &ds_ptr->choice_dictionaries[column]);
             }
         }
         // clean up
@@ -388,11 +302,10 @@ namespace rdma {
         ds_ptr.release();
 
         if (ret) {
-            build_statistics(data_store);
-//            return shared_ptr<DataStore>(data_store);
+            build_statistics(*data_store);
             return data_store;
         } else {
-            throw runtime_error("Could not deserialze cache into store");
+            throw runtime_error("Could not deserialize cache into store");
         }
     }
 

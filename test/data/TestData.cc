@@ -103,6 +103,7 @@ void TestData::tearDown() {
     }
 
     rmdir(data_location.c_str());
+    data_store.clear();
 }
 
 void TestData::testReadAndWriteOfStrings() {
@@ -203,18 +204,39 @@ void TestData::testSerializationAndDeserialization() {
     CPPUNIT_ASSERT_MESSAGE("RESULT SUCCESS", success);
     CPPUNIT_ASSERT_MESSAGE("SAME AMOUNT STRING COLUMNS",
                            ref_ds_ptr->strings.size() == test_ds_ptr->strings.size());
+    for (auto &col_entry : ref_ds_ptr->strings) {
+        auto test_col = test_ds_ptr->strings[col_entry.first];
+        for (ulong i = 0; i < col_entry.second.size(); ++i) {
+            CPPUNIT_ASSERT_MESSAGE("SAME VALUE", col_entry.second[i] == test_col[i]);
+        }
+    }
     CPPUNIT_ASSERT_MESSAGE("SAME AMOUNT NUMERIC COLUMNS",
                            ref_ds_ptr->numerics.size() == test_ds_ptr->numerics.size());
+    for (auto &col_entry : ref_ds_ptr->numerics) {
+        auto test_col = test_ds_ptr->numerics[col_entry.first];
+        for (ulong i = 0; i < col_entry.second.size(); ++i) {
+            CPPUNIT_ASSERT_MESSAGE("SAME VALUE", col_entry.second[i] == test_col[i]);
+        }
+    }
     CPPUNIT_ASSERT_MESSAGE("SAME AMOUNT CHOICE COLUMNS",
                            ref_ds_ptr->choices.size() == test_ds_ptr->choices.size());
+    for (auto &col_entry : ref_ds_ptr->choices) {
+        auto test_col = test_ds_ptr->choices[col_entry.first];
+        for (ulong i = 0; i < col_entry.second.size(); ++i) {
+            CPPUNIT_ASSERT_MESSAGE("SAME VALUE", col_entry.second[i] == test_col[i]);
+        }
+    }
     CPPUNIT_ASSERT_MESSAGE("SAME AMOUNT DICT ENTRIES",
                            ref_ds_ptr->choice_dictionaries.size() == test_ds_ptr->choice_dictionaries.size());
-
-//    printf(" I) use count shared ptr: %li", data_store.use_count());
+    for (auto &dict_entry : ref_ds_ptr->choice_dictionaries) {
+        map<string, int> test_map = test_ds_ptr->choice_dictionaries[dict_entry.first];
+        for (auto &entry : dict_entry.second) {
+            CPPUNIT_ASSERT_MESSAGE("KEY FOUND", test_map.count(entry.first) > 0);
+            CPPUNIT_ASSERT_MESSAGE("SAME VALUE", test_map[entry.first] == entry.second);
+        }
+    }
     ref_ds_ptr.release();
-    test_ds_ptr.release();
-//    printf("II) use count shared ptr: %li", data_store.use_count());
-//    data_store_p.reset();
+    auto p = test_ds_ptr.release();
 }
 
 
